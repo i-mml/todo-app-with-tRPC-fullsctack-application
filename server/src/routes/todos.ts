@@ -7,6 +7,7 @@ import {
   TodoInput,
 } from "../validators/todoValidator";
 import mongoose from "mongoose";
+import { createResponse } from "../helpers/createResponse";
 
 const t = initTRPC.create();
 
@@ -27,11 +28,16 @@ export const todosRouter = t.router({
   }),
   delete: t.procedure.input(DeleteTodoInput).mutation(async ({ input }) => {
     const { id } = input;
-    const todoItem = await TodoModel.findByIdAndDelete(id);
+    const deletedTodo = await TodoModel.findByIdAndDelete(id);
 
-    if (!todoItem) {
-      throw new Error("Todo not found ..!");
+    if (!deletedTodo) {
+      return createResponse(
+        false,
+        "Todo not found",
+        undefined,
+        "The target Todo not found in database."
+      );
     }
-    return todoItem;
+    return createResponse(true, "Todo deleted successfully", deletedTodo);
   }),
 });
